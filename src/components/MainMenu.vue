@@ -11,6 +11,14 @@
         @change="handleImageSelection"
       />
     </button>
+    <div class="url">
+      <input
+        class="url-input"
+        v-model="imageUrl"
+        placeholder="URL"
+        @keydown.enter="loadImageFromUrl"
+      />
+    </div>
     <button class="menu-button" @click="handleButtonClick" value="pipette">
       <label
         class="button-label"
@@ -46,6 +54,13 @@ export default defineComponent({
         this.$emit("onImageSelected", imageUrl);
 
         target.value = "";
+      }
+    },
+    loadImageFromUrl() {
+      if (this.imageUrl) {
+        this.$emit("onImageSelected", this.imageUrl);
+        this.selectedImage = this.imageUrl;
+        this.imageUrl = "";
       }
     },
     handleButtonClick(event) {
@@ -108,6 +123,12 @@ export default defineComponent({
 
   &-image {
     height: 25px;
+  }
+}
+
+.url {
+  &-input {
+    width: 48px;
   }
 }
 </style>

@@ -69,7 +69,7 @@ export default defineComponent({
         this.imageHeight = img.height;
         ctx?.drawImage(img, 0, 0, img.width, img.height);
       };
-
+      console.log(imageUrl);
       img.src = imageUrl;
     },
     handleMouseDown(event) {

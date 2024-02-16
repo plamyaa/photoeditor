@@ -28,7 +28,6 @@ export default defineComponent({
       this.selectedImage = imageUrl;
     },
     changeState(state: string) {
-      console.log(state);
       this.state = state;
     },
     handleEscapeKey(event: KeyboardEvent) {
