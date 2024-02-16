@@ -14,6 +14,13 @@
       <span v-if="state === 'pipette' && pickedColor">
         | Color: {{ pickedColor }}
       </span>
+      <div
+        v-if="state === 'pipette' && pickedColor"
+        class="pipette-color"
+        :style="{
+          background: pickedColor,
+        }"
+      ></div>
     </div>
   </div>
 </template>
@@ -99,11 +106,12 @@ export default defineComponent({
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .canvas {
-  width: 100%;
-  height: calc(100% - 20px);
+  // width: 100%;
+  // height: calc(100% - 20px);
 }
 
 .info {
@@ -115,5 +123,11 @@ export default defineComponent({
 
 .pipette {
   cursor: crosshair;
+
+  &-color {
+    margin-top: 2.5px;
+    width: 15px;
+    height: 15px;
+  }
 }
 </style>
