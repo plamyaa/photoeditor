@@ -59,16 +59,29 @@ export default defineComponent({
       );
     },
     drawImageOnCanvas(imageUrl) {
+      const canvas = this.$refs.canvas;
       const ctx = this.canvasRef?.getContext("2d");
       const img = new Image();
 
       img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.canvasRef.width = img.width;
         this.canvasRef.height = img.height;
         this.imageWidth = img.width;
         this.imageHeight = img.height;
         ctx?.drawImage(img, 0, 0, img.width, img.height);
       };
+      // img.onload = () => {
+      //   const scale = Math.min(
+      //     canvas.width / img.width,
+      //     canvas.height / img.height
+      //   );
+      //   const newWidth = img.width * scale;
+      //   const newHeight = img.height * scale;
+      //   const x = (canvas.width - newWidth) / 2;
+      //   const y = (canvas.height - newHeight) / 2;
+      //   ctx.drawImage(img, 0, 0, newWidth, newHeight);
+      // };
       console.log(imageUrl);
       img.src = imageUrl;
     },
@@ -110,8 +123,9 @@ export default defineComponent({
 }
 
 .canvas {
-  // width: 100%;
-  // height: calc(100% - 20px);
+  border: 1px solid black;
+  width: 100%;
+  height: calc(100% - 20px);
 }
 
 .info {
