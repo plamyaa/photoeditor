@@ -27,6 +27,14 @@
         <img class="button-image" src="../assets/pipette.png" alt="Pipette" />
       </label>
     </button>
+    <button class="menu-button" @click="handleButtonClick" value="modal">
+      <label
+        class="button-label"
+        :class="{ 'button-label-tapped': state === 'modal' }"
+      >
+        <img class="button-image" src="../assets/modal.png" alt="modal" />
+      </label>
+    </button>
   </div>
 </template>
 
@@ -41,6 +49,7 @@ export default defineComponent({
   data() {
     return {
       selectedImage: "",
+      imageUrl: "",
     };
   },
   methods: {

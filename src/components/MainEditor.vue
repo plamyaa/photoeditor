@@ -6,30 +6,83 @@
       :class="stateCursor"
       @mousedown="handleMouseDown"
     ></canvas>
-    <div class="info">
-      <span v-if="state"> State: {{ state }} </span>
-      <span v-if="imageWidth && imageHeight">
-        | Width: {{ imageWidth }} Height: {{ imageHeight }}
-      </span>
-      <span v-if="state === 'pipette' && pickedColor">
-        | Color: {{ pickedColor }}
-      </span>
-      <div
-        v-if="state === 'pipette' && pickedColor"
-        class="pipette-color"
-        :style="{
-          background: pickedColor,
-        }"
-      ></div>
-    </div>
+    <StatusBar
+      :state="state"
+      :imageHeight="imageHeight"
+      :imageWidth="imageWidth"
+      :pickedColor="pickedColor"
+      :xMouse="xMouse"
+      :yMouse="yMouse"
+      :scale="scale"
+      :maxScale="maxScale"
+      @updateScale="updateScale"
+    />
   </div>
+  <ModalWindow v-show="isShowModal" @close="closeModal">
+    <template v-slot:body>
+      <div class="modal">
+        <p>
+          Total pixels before:
+          {{ (imageWidth * imageHeight) / 1000000 }} MP
+        </p>
+        <p>Total pixels after: {{ (newWidth * newHeight) / 1000000 }} MP</p>
+
+        <label for="resizeUnit">Resize Unit:</label>
+        <select v-model="resizeUnit" id="resizeUnit">
+          <option value="percentage">Percentage</option>
+          <option value="pixels">Pixels</option>
+        </select>
+
+        <label for="width">Width:</label>
+        <input
+          :value="newWidth"
+          @change="handleNewWidthChange"
+          @blur="handleNewWidthBlur"
+          id="width"
+          type="number"
+        />
+        <label for="height">Height:</label>
+        <input
+          :value="newHeight"
+          @change="handleNewHeightChange"
+          @blur="handleNewHeightBlur"
+          id="height"
+          type="number"
+        />
+
+        <label>
+          <input v-model="maintainAspectRatio" type="checkbox" />
+          Maintain Aspect Ratio
+        </label>
+
+        <label for="interpolation">Interpolation Algorithm:</label>
+        <select v-model="interpolation" id="interpolation">
+          <option value="nearestNeighbor">Nearest Neighbor</option>
+          <!-- Add other interpolation options if needed -->
+        </select>
+
+        <div v-if="interpolation === 'nearestNeighbor'" class="tooltip">
+          Nearest Neighbor: Each pixel in the new image is assigned the value of
+          the nearest pixel in the original image.
+        </div>
+      </div>
+    </template>
+    <template v-slot:footer>
+      <button @click="handleModalConfirm" class="confirm-button">
+        Confirm
+      </button>
+    </template>
+  </ModalWindow>
 </template>
 
 <script>
-import { defineComponent, watch } from "vue";
+import { defineComponent } from "vue";
+import ModalWindow from "./ModalWindow";
+import StatusBar from "./StatusBar";
 
 export default defineComponent({
   name: "MainEditor",
+  components: { ModalWindow, StatusBar },
   props: {
     selectedImage: String,
     state: String,
@@ -41,56 +94,86 @@ export default defineComponent({
       stateCursor: null,
       imageWidth: null,
       imageHeight: null,
+      xMouse: null,
+      yMouse: null,
+      isShowModal: false,
+      scale: 100,
+      maxScale: 300,
+      maxWidth: null,
+      maxHeight: null,
+      newWidth: null,
+      newHeight: null,
+      maintainAspectRatio: false,
+      resizeUnit: "percentage",
+      interpolation: "nearestNeighbor",
+      newPixels: null,
     };
   },
+  emits: ["changeState"],
   mounted() {
     this.canvasRef = this.$refs.canvas;
-    this.setupImageWatcher();
+    this.maxWidth = this.canvasRef.clientWidth;
+    this.maxHeight = this.canvasRef.clientHeight;
   },
   methods: {
-    setupImageWatcher() {
-      watch(
-        () => this.selectedImage,
-        (newImage) => {
-          if (newImage) {
-            this.drawImageOnCanvas(newImage);
-          }
-        }
-      );
-    },
-    drawImageOnCanvas(imageUrl) {
-      const canvas = this.$refs.canvas;
+    drawImageOnCanvas(width = null, height = null) {
+      const canvas = this.canvasRef;
       const ctx = this.canvasRef?.getContext("2d");
       const img = new Image();
 
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.canvasRef.width = img.width;
-        this.canvasRef.height = img.height;
-        this.imageWidth = img.width;
-        this.imageHeight = img.height;
-        ctx?.drawImage(img, 0, 0, img.width, img.height);
+        canvas.width = this.canvasRef.clientWidth;
+        canvas.height = this.canvasRef.clientHeight;
+
+        let newImageWidth, newImageHeight;
+        if (canvas.width < img.width) {
+          const coef = canvas.width / img.width;
+          newImageWidth = canvas.width - 100;
+          newImageHeight = canvas.height * coef;
+        } else if (canvas.height < img.height) {
+          const coef = canvas.height / img.height;
+          newImageWidth = canvas.width * coef;
+          newImageHeight = canvas.height - 100;
+        }
+
+        if (width && height) {
+          newImageWidth = width;
+          newImageHeight = height;
+        }
+
+        newImageWidth = newImageWidth * (this.scale / 100);
+        newImageHeight = newImageHeight * (this.scale / 100);
+
+        if (canvas.width <= newImageWidth || canvas.height <= newImageHeight) {
+          this.maxScale = this.scale;
+        }
+
+        const leftOffset = Math.abs(canvas.width - newImageWidth) / 2;
+        const topOffset = Math.abs(canvas.height - newImageHeight) / 2;
+
+        ctx.drawImage(
+          img,
+          leftOffset,
+          topOffset,
+          newImageWidth,
+          newImageHeight
+        );
+
+        this.imageWidth = Math.trunc(newImageWidth);
+        this.imageHeight = Math.trunc(newImageHeight);
+        this.newWidth = Math.trunc(newImageWidth);
+        this.newHeight = Math.trunc(newImageHeight);
       };
-      // img.onload = () => {
-      //   const scale = Math.min(
-      //     canvas.width / img.width,
-      //     canvas.height / img.height
-      //   );
-      //   const newWidth = img.width * scale;
-      //   const newHeight = img.height * scale;
-      //   const x = (canvas.width - newWidth) / 2;
-      //   const y = (canvas.height - newHeight) / 2;
-      //   ctx.drawImage(img, 0, 0, newWidth, newHeight);
-      // };
-      console.log(imageUrl);
-      img.src = imageUrl;
+
+      img.src = this.selectedImage;
     },
     handleMouseDown(event) {
       if (this.state == "pipette") {
         this.handleColorPick(event);
+        this.handleCoordinates();
       }
     },
-
     handleColorPick(event) {
       const ctx = this.canvasRef.getContext("2d");
       if (!ctx) return;
@@ -103,12 +186,71 @@ export default defineComponent({
 
       this.pickedColor = color;
     },
+    handleCoordinates() {
+      const canvas = this.canvasRef;
+      const leftCoordinate =
+        event.offsetX - Math.abs(canvas.width - this.imageWidth) / 2;
+      const topCoordinate =
+        event.offsetY - Math.abs(canvas.height - this.imageHeight) / 2;
+
+      if (
+        leftCoordinate > 0 &&
+        topCoordinate > 0 &&
+        this.imageWidth - leftCoordinate > 0 &&
+        this.imageHeight - topCoordinate > 0
+      ) {
+        this.xMouse = Math.trunc(leftCoordinate);
+        this.yMouse = Math.trunc(topCoordinate);
+      } else {
+        this.xMouse = null;
+        this.yMouse = null;
+      }
+    },
+    closeModal() {
+      this.isShowModal = false;
+      this.$emit("changeState", "");
+    },
+    updateScale(value) {
+      this.scale = +value;
+      this.drawImageOnCanvas();
+    },
+    handleModalConfirm() {
+      this.drawImageOnCanvas(this.newWidth, this.newHeight);
+    },
+    handleNewWidthChange(event) {
+      const value = +event.target.value;
+      if (value < this.maxWidth) {
+        this.newWidth = value;
+      } else if (value > this.maxWidth) {
+        this.newWidth = this.maxWidth;
+      }
+      if (value < 1) {
+        this.newWidth = 1;
+      }
+    },
+    handleNewHeightChange(event) {
+      const value = +event.target.value;
+      if (value < this.maxHeight) {
+        this.newHeight = value;
+      } else if (value > this.maxHeight) {
+        this.newHeight = this.maxHeight;
+      }
+      if (value < 1) {
+        this.newHeight = 1;
+      }
+    },
   },
   watch: {
     state(newValue) {
       if (newValue === "pipette") {
         this.stateCursor = "pipette";
+      }
+      if (newValue === "modal") {
+        this.isShowModal = true;
       } else this.stateCursor = null;
+    },
+    selectedImage() {
+      this.drawImageOnCanvas();
     },
   },
 });
@@ -123,25 +265,9 @@ export default defineComponent({
 }
 
 .canvas {
-  border: 1px solid black;
-  width: 100%;
-  height: calc(100% - 20px);
+  flex: 1;
 }
-
-.info {
-  height: 20px;
-  background: #e5e5e5;
-  display: flex;
-  gap: 5px;
-}
-
-.pipette {
-  cursor: crosshair;
-
-  &-color {
-    margin-top: 2.5px;
-    width: 15px;
-    height: 15px;
-  }
+.confirm-button {
+  cursor: pointer;
 }
 </style>

@@ -5,7 +5,11 @@
       :state="state"
       @changeState="changeState"
     />
-    <MainEditor :selectedImage="selectedImage" :state="state" />
+    <MainEditor
+      :selectedImage="selectedImage"
+      @changeState="changeState"
+      :state="state"
+    />
   </div>
 </template>
 
