@@ -49,12 +49,10 @@ export default defineComponent({
     xMouse: Number,
     yMouse: Number,
     scale: Number,
-    maxScale: Number,
   },
   methods: {
     updateScale(event) {
       const newScale = event.target.value;
-      if (newScale > this.maxScale) return;
       this.$emit("updateScale", newScale);
     },
   },

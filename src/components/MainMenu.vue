@@ -35,6 +35,15 @@
         <img class="button-image" src="../assets/modal.png" alt="modal" />
       </label>
     </button>
+    <button class="menu-button" @click="saveCanvasImage" value="save">
+      <label class="button-label">
+        <img
+          class="button-image"
+          src="../assets/downloads.png"
+          alt="Save Image"
+        />
+      </label>
+    </button>
   </div>
 </template>
 
@@ -71,6 +80,16 @@ export default defineComponent({
         this.selectedImage = this.imageUrl;
         this.imageUrl = "";
       }
+    },
+    saveCanvasImage() {
+      const canvas = document.getElementById("canvas");
+      const imageDataURL = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = imageDataURL;
+      link.download = "my_image.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
     handleButtonClick(event) {
       const target = event.target;
