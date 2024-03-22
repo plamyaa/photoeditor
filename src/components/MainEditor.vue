@@ -33,22 +33,26 @@
           <option value="pixels">Pixels</option>
         </select>
         <label for="width">Width:</label>
-        <input :value="newiw" @change="updateNewiw" id="width" type="number" />
+        <input :value="newiw" @input="updateNewiw" id="width" type="number" />
         <label for="height">Height:</label>
-        <input :value="newih" @change="updateNewih" id="height" type="number" />
+        <input :value="newih" @input="updateNewih" id="height" type="number" />
         <label>
-          <input v-model="bind" type="checkbox" />
+          <input
+            v-model="bind"
+            @input="() => (newih = newiw)"
+            type="checkbox"
+          />
           Bind width and height
         </label>
         <label for="interpolation">Interpolation Algorithm:</label>
         <select v-model="interpolation" id="interpolation">
-          <option value="nearestNeighbor">Nearest Neighbor</option>
-          <!-- Add other interpolation options if needed -->
+          <option
+            value="nearestNeighbor"
+            title="Nearest Neighbor: Each pixel in the new image is assigned the value of the nearest pixel in the original image."
+          >
+            Nearest Neighbor
+          </option>
         </select>
-        <div v-if="interpolation === 'nearestNeighbor'" class="tooltip">
-          Nearest Neighbor: Each pixel in the new image is assigned the value of
-          the nearest pixel in the original image.
-        </div>
       </div>
     </template>
     <template v-slot:footer>
@@ -251,6 +255,7 @@ export default defineComponent({
       this.scale = +value;
     },
     handleModalConfirm() {
+      this.scale = 100;
       if (this.resizeUnit === "pixels") {
         this.drawImageOnCanvas(this.newiw, this.newih);
       }

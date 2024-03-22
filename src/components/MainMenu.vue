@@ -19,24 +19,45 @@
         @keydown.enter="loadImageFromUrl"
       />
     </div>
-    <button class="menu-button" @click="handleButtonClick" value="pipette">
+    <button
+      class="menu-button"
+      @click="handleButtonClick"
+      :disabled="!selectedImage"
+      value="pipette"
+    >
       <label
         class="button-label"
-        :class="{ 'button-label-tapped': state === 'pipette' }"
+        :class="{
+          'button-label-tapped': state === 'pipette',
+          disabled: !selectedImage,
+        }"
       >
         <img class="button-image" src="../assets/pipette.png" alt="Pipette" />
       </label>
     </button>
-    <button class="menu-button" @click="handleButtonClick" value="modal">
+    <button
+      class="menu-button"
+      @click="handleButtonClick"
+      :disabled="!selectedImage"
+      value="modal"
+    >
       <label
         class="button-label"
-        :class="{ 'button-label-tapped': state === 'modal' }"
+        :class="{
+          'button-label-tapped': state === 'modal',
+          disabled: !selectedImage,
+        }"
       >
         <img class="button-image" src="../assets/modal.png" alt="modal" />
       </label>
     </button>
-    <button class="menu-button" @click="saveCanvasImage" value="save">
-      <label class="button-label">
+    <button
+      class="menu-button"
+      @click="saveCanvasImage"
+      :disabled="!selectedImage"
+      value="save"
+    >
+      <label class="button-label" :class="{ disabled: !selectedImage }">
         <img
           class="button-image"
           src="../assets/downloads.png"
@@ -158,5 +179,8 @@ export default defineComponent({
   &-input {
     width: 48px;
   }
+}
+.disabled {
+  opacity: 0.3;
 }
 </style>

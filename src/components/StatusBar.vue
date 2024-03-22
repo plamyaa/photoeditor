@@ -1,7 +1,7 @@
 <template>
   <div class="status-bar">
     <div class="left-side">
-      <span v-if="state"> State: {{ state }} </span>
+      <span v-if="state"> State: {{ state }}</span>
       <span v-if="imageWidth && imageHeight">
         | Width: {{ imageWidth }} Height: {{ imageHeight }}
       </span>
