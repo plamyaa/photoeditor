@@ -71,7 +71,7 @@ export default {
 .modal-header {
   position: relative;
   border-bottom: 1px solid #eeeeee;
-  color: #4aae9b;
+  color: #ececec;
   justify-content: space-between;
 }
 
@@ -93,18 +93,11 @@ export default {
   right: 0;
   border: none;
   font-size: 20px;
-  padding: 10px;
+  padding: 3px 10px;
   cursor: pointer;
   font-weight: bold;
-  color: #4aae9b;
+  color: #4f4f4f;
   background: transparent;
-}
-
-.btn-green {
-  color: white;
-  background: #4aae9b;
-  border: 1px solid #4aae9b;
-  border-radius: 2px;
 }
 
 .modal-fade-enter,

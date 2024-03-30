@@ -5,11 +5,7 @@
       :state="state"
       @changeState="changeState"
     />
-    <MainEditor
-      :selectedImage="selectedImage"
-      @changeState="changeState"
-      :state="state"
-    />
+    <MainEditor :img="img" @changeState="changeState" :state="state" />
   </div>
 </template>
 
@@ -23,13 +19,13 @@ export default defineComponent({
   components: { MainMenu, MainEditor },
   data() {
     return {
-      selectedImage: "",
+      img: "",
       state: "",
     };
   },
   methods: {
     handleImageSelected(imageUrl: string) {
-      this.selectedImage = imageUrl;
+      this.img = imageUrl;
     },
     changeState(state: string) {
       this.state = state;

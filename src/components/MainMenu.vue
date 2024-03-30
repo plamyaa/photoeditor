@@ -1,6 +1,11 @@
 <template>
   <div class="menu">
-    <button class="menu-button" @click="handleButtonClick" value="input">
+    <button
+      class="menu-button"
+      @click="handleButtonClick"
+      value="input"
+      title="Choose an image file using the file selection dialog"
+    >
       <label for="fileInput" class="button-label">
         <img class="button-image" src="../assets/file.png" alt="Select Image" />
       </label>
@@ -24,6 +29,7 @@
       @click="handleButtonClick"
       :disabled="!selectedImage"
       value="pipette"
+      title="Use the pipette tool to select a color from the image"
     >
       <label
         class="button-label"
@@ -40,6 +46,7 @@
       @click="handleButtonClick"
       :disabled="!selectedImage"
       value="modal"
+      title="Display a modal window on the image for inputting additional information or performing a specific action."
     >
       <label
         class="button-label"
@@ -53,9 +60,27 @@
     </button>
     <button
       class="menu-button"
+      @click="handleButtonClick"
+      :disabled="!selectedImage"
+      value="hand"
+      title="Move the image across the canvas"
+    >
+      <label
+        class="button-label"
+        :class="{
+          'button-label-tapped': state === 'hand',
+          disabled: !selectedImage,
+        }"
+      >
+        <img class="button-image" src="../assets/hand.png" alt="Move Image" />
+      </label>
+    </button>
+    <button
+      class="menu-button"
       @click="saveCanvasImage"
       :disabled="!selectedImage"
       value="save"
+      title="Save the current image after making any necessary edits"
     >
       <label class="button-label" :class="{ disabled: !selectedImage }">
         <img

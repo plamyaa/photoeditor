@@ -52,7 +52,7 @@ export default defineComponent({
   },
   methods: {
     updateScale(event) {
-      const newScale = event.target.value;
+      const newScale = +event.target.value;
       this.$emit("updateScale", newScale);
     },
   },
