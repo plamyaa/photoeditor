@@ -89,6 +89,7 @@
       <button @click="handleConfirm" class="confirm-button">Confirm</button>
     </template>
   </ModalWindow>
+  <SideBar v-show="isShowPanel" :state="state" @close="closePanel" />
 </template>
 
 <script>
@@ -98,10 +99,11 @@ import { nearestNeighborInterpolation } from "../interpolations.js";
 import ModalWindow from "./ModalWindow";
 import StatusBar from "./StatusBar";
 import MainCanvas from "./MainCanvas.vue";
+import SideBar from "./SideBar.vue";
 
 export default defineComponent({
   name: "MainEditor",
-  components: { ModalWindow, StatusBar, MainCanvas },
+  components: { ModalWindow, StatusBar, MainCanvas, SideBar },
   props: {
     img: String,
     state: String,
@@ -110,6 +112,7 @@ export default defineComponent({
     return {
       canvasRef: null,
       newImg: null,
+      isShowPanel: false,
 
       resizeUnit: "pixels",
       iw: null,
@@ -131,6 +134,14 @@ export default defineComponent({
     this.canvasRef = this.$refs.canvas.getCanvasRef();
   },
   methods: {
+    closeModal() {
+      this.isShowModal = false;
+      this.$emit("changeState", "");
+    },
+    closePanel() {
+      this.isShowPanel = false;
+      this.$emit("changeState", "");
+    },
     updateImageSizes(iw, ih) {
       this.iw = iw;
       this.ih = ih;
@@ -138,13 +149,9 @@ export default defineComponent({
     updateColor(color) {
       this.pickedColor = color;
     },
-    updateCoordinates(x, y) {
+    updateCoordinates([x, y]) {
       this.xMouse = x;
       this.yMouse = y;
-    },
-    closeModal() {
-      this.isShowModal = false;
-      this.$emit("changeState", "");
     },
     handleConfirm() {
       this.scale = 100;
@@ -232,6 +239,9 @@ export default defineComponent({
     state(newValue) {
       if (newValue === "modal") {
         this.isShowModal = true;
+      }
+      if (newValue === "pipette") {
+        this.isShowPanel = true;
       }
     },
     img() {

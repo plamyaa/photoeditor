@@ -34,6 +34,8 @@ export default defineComponent({
       offsetX: 0,
       offsetY: 0,
       isShiftPressed: false,
+      iw: 0,
+      ih: 0,
     };
   },
   mounted() {
@@ -71,6 +73,8 @@ export default defineComponent({
         }
         this.offsetX = dx;
         this.offsetY = dy;
+        this.iw = iw;
+        this.ih = ih;
         this.$emit("updateImageSizes", ~~iw, ~~ih);
       };
       img.src = this.img;
@@ -87,6 +91,8 @@ export default defineComponent({
         ctx.drawImage(img, dx, dy, iw, ih);
         this.offsetX = dx;
         this.offsetY = dy;
+        this.iw = iw;
+        this.ih = ih;
         this.$emit("updateImageSizes", iw, ih);
       };
       img.src = this.img;
@@ -113,7 +119,7 @@ export default defineComponent({
 
       if (this.state == "pipette") {
         this.$emit("updateColor", this.handleColorPick(e));
-        this.$emit("updateCoordinates", ...this.handleCoordinates(e));
+        this.$emit("updateCoordinates", this.handleCoordinates(e));
       }
     },
     handleMouseUp(e) {
@@ -138,7 +144,7 @@ export default defineComponent({
         this.offsetY += delta * 7;
       }
 
-      this.moveImage(this.offsetX, this.offsetY); // Перерисовываем канвас
+      this.moveImage(this.offsetX, this.offsetY);
     },
     handlePressShiftKey(event) {
       if (event.key === "Shift") {
@@ -217,22 +223,21 @@ export default defineComponent({
       const pixel = ctx.getImageData(offsetX, offsetY, 1, 1).data;
       return `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
     },
-    handleCoordinates({ offsetX, offsetY }) {
-      const cw = this.canvasRef.width;
-      const ch = this.canvasRef.height;
-      const iw = this.iw;
-      const ih = this.ih;
+    handleCoordinates({ offsetX, offsetY, clientX, clientY }) {
+      const x = clientX - this.startX;
+      const y = clientY - this.startY;
+      const xMouse = offsetX - x;
+      const yMouse = offsetY - y;
 
-      if (iw <= cw && ih <= ch)
-        return [
-          Math.trunc(offsetX - (cw - iw) / 2),
-          Math.trunc(offsetY - (ch - ih) / 2),
-        ];
-      if (cw <= iw && ih <= ch)
-        return [iw - cw + offsetX, Math.trunc(offsetY - (ch - ih) / 2)];
-      if (ch <= ih && iw <= cw)
-        return [Math.trunc(offsetX - (cw - iw) / 2), ih - ch + offsetY];
-      if (cw < iw && ch < iw) return [iw - cw + offsetX, ih - ch + offsetY];
+      if (
+        xMouse <= 0 ||
+        yMouse <= 0 ||
+        this.iw <= xMouse ||
+        this.ih <= yMouse
+      ) {
+        return [null, null];
+      }
+      return [~~xMouse, ~~yMouse];
     },
     handleImageProportions() {
       if (this.newImg) {
