@@ -89,7 +89,15 @@
       <button @click="handleConfirm" class="confirm-button">Confirm</button>
     </template>
   </ModalWindow>
-  <SideBar v-show="isShowPanel" :state="state" @close="closePanel" />
+  <SideBar
+    v-show="isShowPanel"
+    :state="state"
+    :pickedColor="pickedColor"
+    :xMouse="xMouse"
+    :yMouse="yMouse"
+    @close="closePanel"
+    @changeState="(value) => $emit('changeState', value)"
+  />
 </template>
 
 <script>
