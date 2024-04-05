@@ -19,7 +19,7 @@
         :style="{ background: color2 }"
       />
     </div>
-    <div class="colors-info" v-if="color1RGB && color2RGB">
+    <div class="colors-info">
       <p class="color-parameter">X</p>
       <div class="color-parameters">
         <p>{{ color1X }}</p>
@@ -30,17 +30,32 @@
         <p>{{ color1Y }}</p>
         <p>{{ color2Y }}</p>
       </div>
-      <p class="color-parameter" title="Range 0-255">RGB</p>
+      <p
+        class="color-parameter"
+        title="Color model combining red, green, and blue light intensities to create colors in digital displays."
+      >
+        RGB
+      </p>
       <div class="color-parameters">
         <p>{{ color1RGB }}</p>
         <p>{{ color2RGB }}</p>
       </div>
-      <p class="color-parameter">XYZ</p>
+      <p
+        class="color-parameter"
+        title="Standard color space representing human visual perception of colors, used as a foundation for other color spaces."
+      >
+        XYZ
+      </p>
       <div class="color-parameters">
         <p>{{ color1XYZ }}</p>
         <p>{{ color2XYZ }}</p>
       </div>
-      <p class="color-parameter">Lab</p>
+      <p
+        class="color-parameter"
+        title="Perceptually uniform color space with components for lightness (L*) and color opponent axes (a*, b*), ideal for accurate color reproduction and correction."
+      >
+        Lab
+      </p>
       <div class="color-parameters">
         <p>{{ color1Lab }}</p>
         <p>{{ color2Lab }}</p>
@@ -121,22 +136,24 @@ export default defineComponent({
       return `${tone1.toFixed(1)}, ${tone2.toFixed(1)}, ${tone3.toFixed(1)}`;
     },
     calculateContrastRatio(color1, color2) {
+      const sRGBToLinear = (c) => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      };
+
       const getLuminance = (color) => {
-        const rgb = this.parseColor(color);
-        const r = rgb[0] / 255;
-        const g = rgb[1] / 255;
-        const b = rgb[2] / 255;
+        const r = sRGBToLinear(color[0]);
+        const g = sRGBToLinear(color[1]);
+        const b = sRGBToLinear(color[2]);
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
       };
 
       const luminance1 = getLuminance(color1);
       const luminance2 = getLuminance(color2);
 
-      // Находим максимальное и минимальное значение яркости
       const maxLuminance = Math.max(luminance1, luminance2);
       const minLuminance = Math.min(luminance1, luminance2);
 
-      // Рассчитываем контрастный коэффициент по формуле: (L1 + 0.05) / (L2 + 0.05), где L1 и L2 - яркости цветов
       const contrastRatio = (maxLuminance + 0.05) / (minLuminance + 0.05);
 
       return contrastRatio.toFixed(1);

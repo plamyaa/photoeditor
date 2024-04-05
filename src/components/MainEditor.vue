@@ -60,8 +60,8 @@
             />
           </div>
           <div class="input-with-prefix">
-            <label for="height" :style="{ left: '5px' }"> H</label>
-            <label for="width" class="type" :style="{ right: '3px' }">
+            <label for="height" :style="{ left: '6px' }"> H</label>
+            <label for="height" class="type" :style="{ right: '3px' }">
               {{ resizeUnit === "pixels" ? "px" : "%" }}
             </label>
             <input id="height" :value="newih" @change="updateNewih" />
