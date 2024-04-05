@@ -176,20 +176,37 @@ export default defineComponent({
         image.widht = this.newiw * widthPercent;
         image.height = this.newih * heightPercent;
       }
+      this.iw = image.width;
+      this.ih = image.height;
       this.newImg = image;
+      this.isShowModal = false;
+      this.$emit("changeState", "");
     },
     updateModal() {
       if (this.resizeUnit === "pixels") {
-        this.newiw = this.iw;
-        this.newih = this.ih;
+        if (this.newiw === null) {
+          this.newiw = this.iw;
+          if (this.canvasRef.width < this.iw) {
+            this.newiw = this.canvasRef.width;
+          }
+        }
+
+        if (this.newih === null) {
+          this.newih = this.ih;
+          if (this.canvasRef.height < this.ih) {
+            this.newih = this.canvasRef.height;
+          }
+        }
       }
       if (this.resizeUnit === "percentage") {
         const { width, height } = this.canvasRef;
         const widthPercent = width / 100;
         const heightPercent = height / 100;
 
-        this.newiw = ~~(this.iw / widthPercent);
-        this.newih = ~~(this.ih / heightPercent);
+        if (this.newiw == null) {
+          this.newiw = ~~(this.iw / widthPercent);
+          this.newih = ~~(this.ih / heightPercent);
+        }
       }
     },
     updateNewiw(event) {
@@ -197,6 +214,10 @@ export default defineComponent({
 
       if (!isNaN(num) && num > 0) {
         this.newiw = num;
+
+        if (this.canvasRef.width < num) {
+          this.newiw = this.canvasRef.width;
+        }
 
         if (this.bind) {
           const coef = this.ih / this.iw;
@@ -212,6 +233,10 @@ export default defineComponent({
 
       if (!isNaN(num) && num > 0) {
         this.newih = num;
+
+        if (this.canvasRef.height < num) {
+          this.newih = this.canvasRef.height;
+        }
 
         if (this.bind) {
           const coef = this.iw / this.ih;
@@ -247,12 +272,25 @@ export default defineComponent({
     state(newValue) {
       if (newValue === "modal") {
         this.isShowModal = true;
+        this.isShowPanel = false;
       }
       if (newValue === "pipette") {
         this.isShowPanel = true;
+        this.isShowModal = false;
+      }
+      if (newValue === "save") {
+        this.handleConfirm();
+      }
+      if (!newValue) {
+        this.isShowModal = false;
+        this.isShowPanel = false;
       }
     },
     img() {
+      this.iw = null;
+      this.ih = null;
+      this.newiw = null;
+      this.newih = null;
       this.scale = 100;
     },
     isShowModal(newValue) {

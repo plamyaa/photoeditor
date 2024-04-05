@@ -1,7 +1,7 @@
 <template>
   <div class="color-info-panel">
     <div class="panel-header">
-      <button class="close-button" @click="close">X</button>
+      <button class="close-button" @click="close">x</button>
     </div>
     <div class="colors">
       <input
@@ -19,23 +19,38 @@
         :style="{ background: color2 }"
       />
     </div>
-    <div class="colors-info">
-      <div class="color1">
-        <p>X: {{ color1X }}</p>
-        <p>Y: {{ color1Y }}</p>
-        <p>RGB: {{ color1RGB }}</p>
-        <p>XYZ: {{ color1XYZ }}</p>
-        <p>Lab: {{ color1Lab }}</p>
+    <div class="colors-info" v-if="color1RGB && color2RGB">
+      <p class="color-parameter">X</p>
+      <div class="color-parameters">
+        <p>{{ color1X }}</p>
+        <p>{{ color2X }}</p>
       </div>
-      <div class="color2">
-        <p>X: {{ color2X }}</p>
-        <p>Y: {{ color2Y }}</p>
-        <p>RGB: {{ color2RGB }}</p>
-        <p>XYZ: {{ color2XYZ }}</p>
-        <p>Lab: {{ color2Lab }}</p>
+      <p class="color-parameter">Y</p>
+      <div class="color-parameters">
+        <p>{{ color1Y }}</p>
+        <p>{{ color2Y }}</p>
+      </div>
+      <p class="color-parameter">RGB</p>
+      <div class="color-parameters">
+        <p>{{ color1RGB }}</p>
+        <p>{{ color2RGB }}</p>
+      </div>
+      <p class="color-parameter">XYZ</p>
+      <div class="color-parameters">
+        <p>{{ color1XYZ }}</p>
+        <p>{{ color2XYZ }}</p>
+      </div>
+      <p class="color-parameter">Lab</p>
+      <div class="color-parameters">
+        <p>{{ color1Lab }}</p>
+        <p>{{ color2Lab }}</p>
       </div>
     </div>
-    <div v-if="colorContrast" class="contrast">
+    <div
+      class="contrast"
+      v-if="colorContrast"
+      :style="{ color: colorContrast < 4.5 ? 'red' : 'black' }"
+    >
       Contrast: {{ colorContrast }}
     </div>
   </div>
@@ -103,19 +118,17 @@ export default defineComponent({
     },
     prettyColor([tone1, tone2, tone3], isRGB = false) {
       if (isRGB) return `${tone1}, ${tone2}, ${tone3}`;
-      return `${tone1.toFixed(2)}, ${tone2.toFixed(2)}, ${tone3.toFixed(2)}`;
+      return `${tone1.toFixed(1)}, ${tone2.toFixed(1)}, ${tone3.toFixed(1)}`;
     },
     calculateContrastRatio(color1, color2) {
       const getLuminance = (color) => {
         const rgb = this.parseColor(color);
-        console.log(rgb);
         const r = rgb[0] / 255;
         const g = rgb[1] / 255;
         const b = rgb[2] / 255;
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
       };
 
-      // Получаем яркость для каждого цвета
       const luminance1 = getLuminance(color1);
       const luminance2 = getLuminance(color2);
 
@@ -196,10 +209,12 @@ export default defineComponent({
     pickedColor(newVal) {
       if (this.pickedButton === "button1") {
         this.color1 = newVal;
-      } else {
-        this.color2 = newVal;
+        this.updateColors();
       }
-      this.updateColors();
+      if (this.pickedButton === "button2") {
+        this.color2 = newVal;
+        this.updateColors();
+      }
     },
   },
 });
@@ -211,12 +226,13 @@ export default defineComponent({
   top: 0;
   right: 0;
   width: 200px;
-  height: 500px;
+  height: 290px;
   background: #ececec;
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 10px;
+  padding: 5px 10px;
+  border-radius: 10px;
 
   .panel-header {
     display: flex;
@@ -242,14 +258,27 @@ export default defineComponent({
       width: 23px;
       height: 23px;
       &:checked {
+        outline: 2px solid white;
         border: 2px solid black;
       }
     }
   }
 
   .colors-info {
+    font-size: small;
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+
+    .color-parameter {
+      margin-top: 10px;
+    }
+
+    .color-parameters {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
   }
 
   .contrast {

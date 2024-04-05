@@ -88,7 +88,16 @@ export default defineComponent({
         canvas.height = this.canvasRef.clientHeight;
         ctx.imageSmoothingEnabled = false;
 
-        ctx.drawImage(img, dx, dy, iw, ih);
+        const imageData = ctx.getImageData(...this.getImageSizes(canvas, img));
+        if (this.imageData instanceof ImageData) {
+          const interpolatedData = this.interpolationCb(imageData, ~~iw, ~~ih);
+          if (interpolatedData !== null) {
+            ctx.putImageData(interpolatedData, dx, dy);
+          }
+        } else {
+          ctx.drawImage(img, dx, dy, iw, ih);
+        }
+
         this.offsetX = dx;
         this.offsetY = dy;
         this.iw = iw;
@@ -106,9 +115,7 @@ export default defineComponent({
         canvas.width = this.canvasRef.clientWidth;
         canvas.height = this.canvasRef.clientHeight;
         ctx.imageSmoothingEnabled = false;
-
-        const [, , iw, ih] = this.getImageSizes(canvas, img);
-        ctx.drawImage(img, dx, dy, iw, ih);
+        ctx.drawImage(img, dx, dy, this.iw, this.ih);
       };
       img.src = this.img;
     },
@@ -122,7 +129,7 @@ export default defineComponent({
         this.$emit("updateCoordinates", this.handleCoordinates(e));
       }
     },
-    handleMouseUp(e) {
+    handleMouseUp() {
       this.isDragging = false;
     },
     handleMouseMove(e) {
@@ -250,8 +257,22 @@ export default defineComponent({
         this.drawImage();
       }
     },
+    saveImage() {
+      const imageDataURL = this.canvasRef.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = imageDataURL;
+      link.download = "my_image.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
   },
   watch: {
+    state(newVal) {
+      if (newVal === "save") {
+        this.saveImage();
+      }
+    },
     img() {
       this.handleImageProportions();
     },
@@ -275,5 +296,9 @@ export default defineComponent({
 
 .pipette {
   cursor: crosshair;
+}
+
+.hand {
+  cursor: grab;
 }
 </style>

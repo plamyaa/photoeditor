@@ -5,8 +5,6 @@ export function nearestNeighborInterpolation(img, newWidth, newHeight) {
   const scaleY = originalHeight / newHeight;
   const newData = new Uint8ClampedArray(newWidth * newHeight * 4);
 
-  console.log(img.data);
-
   for (let y = 0; y < newHeight; y++) {
     for (let x = 0; x < newWidth; x++) {
       const px = Math.floor(x * scaleX);
