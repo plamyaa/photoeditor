@@ -108,6 +108,19 @@ export default defineComponent({
     },
     moveImage(dx, dy) {
       const canvas = this.canvasRef;
+      if (dx + 10 > canvas.width) {
+        this.offsetX = canvas.width - 10;
+      }
+      if (dy + 10 > canvas.height) {
+        this.offsetY = canvas.height - 10;
+      }
+      if (this.offsetX + this.iw < 10) {
+        this.offsetX = -this.iw + 10;
+      }
+      if (this.offsetY + this.ih < 10) {
+        this.offsetY = -this.ih + 10;
+      }
+
       const ctx = this.canvasRef?.getContext("2d");
       const img = new Image();
       img.onload = () => {

@@ -30,7 +30,7 @@
         <p>{{ color1Y }}</p>
         <p>{{ color2Y }}</p>
       </div>
-      <p class="color-parameter">RGB</p>
+      <p class="color-parameter" title="Range 0-255">RGB</p>
       <div class="color-parameters">
         <p>{{ color1RGB }}</p>
         <p>{{ color2RGB }}</p>
@@ -51,7 +51,7 @@
       v-if="colorContrast"
       :style="{ color: colorContrast < 4.5 ? 'red' : 'black' }"
     >
-      Contrast: {{ colorContrast }}
+      Contrast: {{ colorContrast }}:1
     </div>
   </div>
 </template>
