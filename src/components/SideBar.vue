@@ -142,9 +142,10 @@ export default defineComponent({
       };
 
       const getLuminance = (color) => {
-        const r = sRGBToLinear(color[0]);
-        const g = sRGBToLinear(color[1]);
-        const b = sRGBToLinear(color[2]);
+        const rgb = this.parseColor(color);
+        const r = sRGBToLinear(rgb[0]);
+        const g = sRGBToLinear(rgb[1]);
+        const b = sRGBToLinear(rgb[2]);
         return 0.2126 * r + 0.7152 * g + 0.0722 * b;
       };
 
