@@ -90,6 +90,21 @@
         />
       </label>
     </button>
+    <button
+      class="menu-button"
+      @click="handleButtonClick"
+      :disabled="!selectedImage"
+      value="correct"
+      title="Edit the current image"
+    >
+      <label class="button-label" :class="{ disabled: !selectedImage }">
+        <img
+          class="button-image"
+          src="../assets/correction.png"
+          alt="Correct Image"
+        />
+      </label>
+    </button>
   </div>
 </template>
 

@@ -10,22 +10,48 @@
     @wheel="handleMouseWheel"
     tabindex="0"
   ></canvas>
+  <CorrectionModal
+    v-show="isShowCorrection"
+    :state="state"
+    :canvasRef="canvasRef || {}"
+    :origImg="origImg"
+    :newImg="newImg"
+    :dx="offsetX"
+    :dy="offsetY"
+    :iw="iw"
+    :ih="ih"
+    @updateNewImgData="(data) => $emit('updateNewImgData', data)"
+    @revertNewImg="$emit('revertNewImg')"
+    @close="$emit('closeCorrection')"
+  />
 </template>
 
 <script>
 import { defineComponent } from "vue";
+import CorrectionModal from "./CorrectionModal.vue";
 
 export default defineComponent({
   name: "MainCanvas",
+  components: { CorrectionModal },
   props: {
     state: String,
     img: String,
+    origImg: Object,
     newImg: Object,
     scale: Number,
     interpolationCb: Function,
     newiw: Number,
     newih: Number,
+    isShowCorrection: Boolean,
   },
+  emits: [
+    "updateImageSizes",
+    "updateColor",
+    "updateCoordinates",
+    "closeCorrection",
+    "revertNewImg",
+    "updateNewImgData",
+  ],
   data() {
     return {
       isDragging: false,
@@ -36,6 +62,7 @@ export default defineComponent({
       isShiftPressed: false,
       iw: 0,
       ih: 0,
+      canvasRef: null,
     };
   },
   mounted() {
@@ -51,10 +78,10 @@ export default defineComponent({
     getCanvasRef() {
       return this.canvasRef;
     },
-    drawImage() {
+    drawImage(newImg) {
       const canvas = this.canvasRef;
       const ctx = this.canvasRef?.getContext("2d");
-      const img = new Image();
+      const img = newImg;
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.width = this.canvasRef.clientWidth;
@@ -71,32 +98,6 @@ export default defineComponent({
         } else {
           ctx.drawImage(img, dx, dy, iw, ih);
         }
-        this.offsetX = dx;
-        this.offsetY = dy;
-        this.iw = iw;
-        this.ih = ih;
-        this.$emit("updateImageSizes", ~~iw, ~~ih);
-      };
-      img.src = this.img;
-    },
-    drawImageWithParameters(img, dx, dy, iw, ih) {
-      const canvas = this.canvasRef;
-      const ctx = this.canvasRef?.getContext("2d");
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.width = this.canvasRef.clientWidth;
-        canvas.height = this.canvasRef.clientHeight;
-        ctx.imageSmoothingEnabled = false;
-
-        const imageData = ctx.getImageData(...this.getImageSizes(canvas, img));
-        if (this.imageData instanceof ImageData) {
-          const interpolatedData = this.interpolationCb(imageData, ~~iw, ~~ih);
-          if (interpolatedData !== null) {
-            ctx.putImageData(interpolatedData, dx, dy);
-          }
-        } else {
-          ctx.drawImage(img, dx, dy, iw, ih);
-        }
 
         this.offsetX = dx;
         this.offsetY = dy;
@@ -104,14 +105,14 @@ export default defineComponent({
         this.ih = ih;
         this.$emit("updateImageSizes", iw, ih);
       };
-      img.src = this.img;
+      img.src = this.newImg.src;
     },
-    moveImage(dx, dy) {
+    moveImage() {
       const canvas = this.canvasRef;
-      if (dx + 10 > canvas.width) {
+      if (this.offsetX + 10 > canvas.width) {
         this.offsetX = canvas.width - 10;
       }
-      if (dy + 10 > canvas.height) {
+      if (this.offsetX + 10 > canvas.height) {
         this.offsetY = canvas.height - 10;
       }
       if (this.offsetX + this.iw < 10) {
@@ -122,15 +123,15 @@ export default defineComponent({
       }
 
       const ctx = this.canvasRef?.getContext("2d");
-      const img = new Image();
+      const img = this.newImg;
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.width = this.canvasRef.clientWidth;
         canvas.height = this.canvasRef.clientHeight;
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, dx, dy, this.iw, this.ih);
+        ctx.drawImage(img, this.offsetX, this.offsetY, this.iw, this.ih);
       };
-      img.src = this.img;
+      img.src = this.newImg.src;
     },
     handleMouseDown(e) {
       this.isDragging = true;
@@ -151,7 +152,7 @@ export default defineComponent({
         const y = e.clientY - this.startY;
         this.offsetX = x;
         this.offsetY = y;
-        this.moveImage(x, y);
+        this.moveImage();
       }
     },
     handleMouseWheel(event) {
@@ -164,7 +165,7 @@ export default defineComponent({
         this.offsetY += delta * 7;
       }
 
-      this.moveImage(this.offsetX, this.offsetY);
+      this.moveImage();
     },
     handlePressShiftKey(event) {
       if (event.key === "Shift") {
@@ -259,17 +260,6 @@ export default defineComponent({
       }
       return [~~xMouse, ~~yMouse];
     },
-    handleImageProportions() {
-      if (this.newImg) {
-        const [dx, dy, iw, ih] = this.getImageSizes(
-          this.canvasRef,
-          this.newImg
-        );
-        this.drawImageWithParameters(this.newImg, dx, dy, iw, ih);
-      } else {
-        this.drawImage();
-      }
-    },
     saveImage() {
       const imageDataURL = this.canvasRef.toDataURL("image/png");
       const link = document.createElement("a");
@@ -286,17 +276,11 @@ export default defineComponent({
         this.saveImage();
       }
     },
-    img() {
-      this.handleImageProportions();
-    },
-    newImg: {
-      handler() {
-        this.handleImageProportions();
-      },
-      deep: true,
+    newImg() {
+      this.drawImage(this.newImg);
     },
     scale() {
-      this.handleImageProportions();
+      this.drawImage(this.newImg);
     },
   },
 });

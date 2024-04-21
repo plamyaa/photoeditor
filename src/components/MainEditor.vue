@@ -4,14 +4,19 @@
       ref="canvas"
       :state="state"
       :img="img"
+      :origImg="origImg"
       :newImg="newImg"
       :scale="scale"
       :interpolationCb="interpolationCb"
       :newiw="newiw"
       :newih="newih"
+      :isShowCorrection="isShowCorrection"
       @updateImageSizes="updateImageSizes"
       @updateColor="updateColor"
       @updateCoordinates="updateCoordinates"
+      @closeCorrection="closeCorrection"
+      @revertNewImg="revertNewImg"
+      @updateNewImgData="updateNewImgData"
     />
     <StatusBar
       :state="state"
@@ -120,7 +125,9 @@ export default defineComponent({
     return {
       canvasRef: null,
       newImg: null,
+      origImg: null,
       isShowPanel: false,
+      isShowCorrection: false,
 
       resizeUnit: "pixels",
       iw: null,
@@ -150,6 +157,10 @@ export default defineComponent({
       this.isShowPanel = false;
       this.$emit("changeState", "");
     },
+    closeCorrection() {
+      this.isShowCorrection = false;
+      this.$emit("changeState", "");
+    },
     updateImageSizes(iw, ih) {
       this.iw = iw;
       this.ih = ih;
@@ -163,7 +174,9 @@ export default defineComponent({
     },
     handleConfirm() {
       this.scale = 100;
+      // force update
       const image = new Image();
+      image.src = this.img;
 
       if (this.resizeUnit === "pixels") {
         image.width = this.newiw;
@@ -267,23 +280,46 @@ export default defineComponent({
       }
       return null;
     },
+    closeModals() {
+      this.isShowPanel = false;
+      this.isShowModal = false;
+      this.isShowCorrection = false;
+    },
+    revertNewImg() {
+      const clear = new Image();
+      clear.width = this.newImg.width;
+      clear.height = this.newImg.height;
+      clear.src = this.newImg.src;
+      this.newImg = clear;
+    },
+    updateNewImgData(data) {
+      // const clear = new Image();
+      // clear.width = this.newImg.width;
+      // clear.height = this.newImg.height;
+      // clear.src = this.newImg.src;
+      // clear.data = data;
+      this.newImg.data = data;
+    },
   },
   watch: {
     state(newValue) {
       if (newValue === "modal") {
+        this.closeModals();
         this.isShowModal = true;
-        this.isShowPanel = false;
       }
       if (newValue === "pipette") {
+        this.closeModals();
         this.isShowPanel = true;
-        this.isShowModal = false;
       }
       if (newValue === "save") {
         this.handleConfirm();
       }
+      if (newValue === "correct") {
+        this.closeModals();
+        this.isShowCorrection = true;
+      }
       if (!newValue) {
-        this.isShowModal = false;
-        this.isShowPanel = false;
+        this.closeModals();
       }
     },
     img() {
@@ -292,6 +328,10 @@ export default defineComponent({
       this.newiw = null;
       this.newih = null;
       this.scale = 100;
+
+      this.origImg = new Image();
+      this.origImg.src = this.img;
+      this.newImg = this.origImg;
     },
     isShowModal(newValue) {
       if (newValue) {
