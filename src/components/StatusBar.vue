@@ -24,6 +24,7 @@
       <label for="scale">Scale</label>
       <input
         type="range"
+        class="scale"
         id="scale"
         name="scale"
         min="12"
@@ -61,11 +62,15 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .status-bar {
+  position: absolute;
+  bottom: 0;
+  width: calc(100% - 50px);
   height: 20px;
   background: #e5e5e5;
   display: flex;
   gap: 5px;
   justify-content: space-between;
+  padding-right: 5px;
 }
 
 .left-side {
@@ -76,5 +81,9 @@ export default defineComponent({
   margin-top: 2.5px;
   width: 15px;
   height: 15px;
+}
+
+.scale {
+  margin-right: 13px;
 }
 </style>
