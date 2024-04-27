@@ -165,7 +165,7 @@ export default defineComponent({
       }
 
       this.chartInstance = new Chart(ctx, {
-        type: "line",
+        type: "line", //scatter
         data: {
           labels: Array.from({ length: 256 }, (_, i) => i),
           datasets: [
@@ -211,12 +211,18 @@ export default defineComponent({
     calculateCorrection() {
       try {
         const lut = [];
-        for (let i = 0; i < 256; i++) {
+        for (let i = 0; i < this.point1x; i++) {
+          lut[i] = this.point1y;
+        }
+        for (let i = this.point1x; i < this.point2x; i++) {
           const slope =
-            (this.point2y - this.point1y) / (this.point2x - this.point1x);
+            (this.point2y - this.point1y) / (this.point2x - this.point1x); // Угловой коэф.
           let correctedValue = this.point1y + slope * (i - this.point1x);
           correctedValue = Math.max(0, Math.min(255, correctedValue));
           lut[i] = correctedValue;
+        }
+        for (let i = this.point2x; i < 256; i++) {
+          lut[i] = this.point2y;
         }
 
         const ctx = this.canvasRef?.getContext("2d");
@@ -242,6 +248,7 @@ export default defineComponent({
     applyCorrection() {
       this.$emit("close");
       this.calculateCorrection();
+      this.buildGraph();
     },
     resetValues() {
       this.point1x = 0;
@@ -264,7 +271,7 @@ export default defineComponent({
     updateY1(event) {
       const num = +event.target.value;
 
-      if (!isNaN(num) && num >= 0 && num < this.point2x) {
+      if (!isNaN(num) && num >= 0 && num < 255) {
         this.point1y = num;
         this.buildGraph();
       } else {
@@ -275,7 +282,7 @@ export default defineComponent({
     updateX2(event) {
       const num = +event.target.value;
 
-      if (!isNaN(num) && num <= 255 && this.point1x < num) {
+      if (!isNaN(num) && num <= 255 && this.point1x <= num) {
         this.point2x = num;
         this.buildGraph();
       } else {
@@ -286,7 +293,7 @@ export default defineComponent({
     updateY2(event) {
       const num = +event.target.value;
 
-      if (!isNaN(num) && num <= 255 && this.point1y < num) {
+      if (!isNaN(num) && num <= 255 && 0 <= num) {
         this.point2y = num;
         this.buildGraph();
       } else {
