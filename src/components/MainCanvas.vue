@@ -24,15 +24,30 @@
     @revertNewImg="$emit('revertNewImg')"
     @close="$emit('closeCorrection')"
   />
+  <FiltrationModal
+    v-show="isShowFiltration"
+    :state="state"
+    :canvasRef="canvasRef || {}"
+    :origImg="origImg"
+    :newImg="newImg"
+    :dx="offsetX"
+    :dy="offsetY"
+    :iw="iw"
+    :ih="ih"
+    @updateNewImgData="(data) => $emit('updateNewImgData', data)"
+    @revertNewImg="$emit('revertNewImg')"
+    @close="$emit('closeFiltration')"
+  />
 </template>
 
 <script>
 import { defineComponent } from "vue";
 import CorrectionModal from "./CorrectionModal.vue";
+import FiltrationModal from "./FiltrationModal.vue";
 
 export default defineComponent({
   name: "MainCanvas",
-  components: { CorrectionModal },
+  components: { CorrectionModal, FiltrationModal },
   props: {
     state: String,
     img: String,
@@ -43,12 +58,14 @@ export default defineComponent({
     newiw: Number,
     newih: Number,
     isShowCorrection: Boolean,
+    isShowFiltration: Boolean,
   },
   emits: [
     "updateImageSizes",
     "updateColor",
     "updateCoordinates",
     "closeCorrection",
+    "closeFiltration",
     "revertNewImg",
     "updateNewImgData",
   ],

@@ -105,6 +105,21 @@
         />
       </label>
     </button>
+    <button
+      class="menu-button"
+      @click="handleButtonClick"
+      :disabled="!selectedImage"
+      value="filter"
+      title="Filter the current image"
+    >
+      <label class="button-label" :class="{ disabled: !selectedImage }">
+        <img
+          class="button-image"
+          src="../assets/filtration.png"
+          alt="Filter Image"
+        />
+      </label>
+    </button>
   </div>
 </template>
 

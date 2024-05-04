@@ -11,10 +11,12 @@
       :newiw="newiw"
       :newih="newih"
       :isShowCorrection="isShowCorrection"
+      :isShowFiltration="isShowFiltration"
       @updateImageSizes="updateImageSizes"
       @updateColor="updateColor"
       @updateCoordinates="updateCoordinates"
       @closeCorrection="closeCorrection"
+      @closeFiltration="closeFiltration"
       @revertNewImg="revertNewImg"
       @updateNewImgData="updateNewImgData"
     />
@@ -128,6 +130,7 @@ export default defineComponent({
       origImg: null,
       isShowPanel: false,
       isShowCorrection: false,
+      isShowFiltration: false,
 
       resizeUnit: "pixels",
       iw: null,
@@ -159,6 +162,10 @@ export default defineComponent({
     },
     closeCorrection() {
       this.isShowCorrection = false;
+      this.$emit("changeState", "");
+    },
+    closeFiltration() {
+      this.isShowFiltration = false;
       this.$emit("changeState", "");
     },
     updateImageSizes(iw, ih) {
@@ -284,6 +291,7 @@ export default defineComponent({
       this.isShowPanel = false;
       this.isShowModal = false;
       this.isShowCorrection = false;
+      this.isShowFiltration = false;
     },
     revertNewImg() {
       const clear = new Image();
@@ -317,6 +325,10 @@ export default defineComponent({
       if (newValue === "correct") {
         this.closeModals();
         this.isShowCorrection = true;
+      }
+      if (newValue === "filter") {
+        this.closeModals();
+        this.isShowFiltration = true;
       }
       if (!newValue) {
         this.closeModals();
