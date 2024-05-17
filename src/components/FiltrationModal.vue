@@ -194,7 +194,7 @@ export default defineComponent({
         }
       }
 
-      // Обработка краев
+      // Обработка краев (дублирование краевых пискелей)
       for (let y = 0; y < paddedHeight; y++) {
         for (let x = 0; x < paddedWidth; x++) {
           const outputIndex = (y * paddedWidth + x) * 4;
