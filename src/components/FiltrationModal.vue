@@ -231,7 +231,8 @@ export default defineComponent({
       if (newVal) {
         this.calculateFiltration();
       } else {
-        this.resetFiltration();
+        this.$emit("revertNewImg");
+        this.previewEnabled = false;
       }
     },
   },
