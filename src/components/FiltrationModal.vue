@@ -33,8 +33,8 @@
                 <input
                   :value="kernel[rowIndex][colIndex]"
                   @change="(e) => updateKernel(e, rowIndex, colIndex)"
-                  :disabled="previewEnabled"
                 />
+                <!-- :disabled="previewEnabled" -->
               </div>
             </div>
           </div>
